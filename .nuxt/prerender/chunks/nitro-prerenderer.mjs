@@ -12,7 +12,7 @@ import unstorage_47drivers_47fs from 'file://C:/WIP%20Projects/Dither-Snake/Dith
 import defu from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/defu/dist/defu.mjs';
 import { toRouteMatcher, createRouter } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/radix3/dist/index.mjs';
 
-const _runtimeConfig = {"app":{"baseURL":"/Snake","buildAssetsDir":"/nuxt/","cdnURL":"/Snake"},"nitro":{"routeRules":{"/__nuxt_error":{"cache":false}},"envPrefix":"NUXT_"},"base":"/Snake/","public":{"base":"/Snake/"}};
+const _runtimeConfig = {"app":{"baseURL":"/Dither-Snake","buildAssetsDir":"/nuxt/","cdnURL":"/Dither-Snake"},"nitro":{"routeRules":{"/__nuxt_error":{"cache":false}},"envPrefix":"NUXT_"},"base":"/Dither-Snake/","public":{"base":"/Dither-Snake/"}};
 const ENV_PREFIX = "NITRO_";
 const ENV_PREFIX_ALT = _runtimeConfig.nitro.envPrefix ?? process.env.NITRO_ENV_PREFIX ?? "_";
 const getEnv = (key) => {

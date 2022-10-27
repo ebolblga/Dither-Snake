@@ -14,14 +14,14 @@ export default defineNuxtConfig({
       viewer: true,
     },
     publicRuntimeConfig:{
-      base:process.env.NODE_ENV == "production" ? "/Snake/": "/"
+      base:process.env.NODE_ENV == "production" ? "/Dither-Snake/": "/"
     },
     app: {
-      baseURL: process.env.NODE_ENV =="production" ? "/Snake": "/",
+      baseURL: process.env.NODE_ENV =="production" ? "/Dither-Snake": "/",
       buildAssetsDir: "/nuxt/",
-      cdnURL:"/Snake"
+      cdnURL:"/Dither-Snake"
     },
     router:{
-      base:process.env.NODE_ENV =="production" ? "/Snake/": "/"
+      base:process.env.NODE_ENV =="production" ? "/Dither-Snake/": "/"
     }
 })
