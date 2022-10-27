@@ -1,16 +1,16 @@
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/node-fetch-native/dist/polyfill.mjs';
-import { eventHandler, setHeaders, sendRedirect, defineEventHandler, handleCacheHeaders, createEvent, getRequestHeader, createApp, createRouter as createRouter$1, lazyEventHandler, toNodeListener } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/h3/dist/index.mjs';
-import { createFetch as createFetch$1, Headers } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/ohmyfetch/dist/node.mjs';
-import destr from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/destr/dist/index.mjs';
-import { createCall, createFetch } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/unenv/runtime/fetch/index.mjs';
-import { createHooks } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/hookable/dist/index.mjs';
-import { snakeCase } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/scule/dist/index.mjs';
-import { hash } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/ohash/dist/index.mjs';
-import { parseURL, withQuery } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/ufo/dist/index.mjs';
-import { createStorage } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/unstorage/dist/drivers/fs.mjs';
-import defu from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/defu/dist/defu.mjs';
-import { toRouteMatcher, createRouter } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/radix3/dist/index.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/node-fetch-native/dist/polyfill.mjs';
+import { eventHandler, setHeaders, sendRedirect, defineEventHandler, handleCacheHeaders, createEvent, getRequestHeader, createApp, createRouter as createRouter$1, lazyEventHandler, toNodeListener } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/h3/dist/index.mjs';
+import { createFetch as createFetch$1, Headers } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/ohmyfetch/dist/node.mjs';
+import destr from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/destr/dist/index.mjs';
+import { createCall, createFetch } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/unenv/runtime/fetch/index.mjs';
+import { createHooks } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/hookable/dist/index.mjs';
+import { snakeCase } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/scule/dist/index.mjs';
+import { hash } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/ohash/dist/index.mjs';
+import { parseURL, withQuery } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/ufo/dist/index.mjs';
+import { createStorage } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/unstorage/dist/drivers/fs.mjs';
+import defu from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/defu/dist/defu.mjs';
+import { toRouteMatcher, createRouter } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/radix3/dist/index.mjs';
 
 const _runtimeConfig = {"app":{"baseURL":"/Snake","buildAssetsDir":"/nuxt/","cdnURL":"/Snake"},"nitro":{"routeRules":{"/__nuxt_error":{"cache":false}},"envPrefix":"NUXT_"},"base":"/Snake/","public":{"base":"/Snake/"}};
 const ENV_PREFIX = "NITRO_";
@@ -69,7 +69,7 @@ const timingMiddleware = eventHandler((event) => {
   }.bind(event.res);
 });
 
-const serverAssets = [{"baseName":"server","dir":"C:/WIP Projects/Snake/Snake/server/assets"}];
+const serverAssets = [{"baseName":"server","dir":"C:/WIP Projects/Dither-Snake/Dither-Snake/server/assets"}];
 
 const assets = createStorage();
 
@@ -83,10 +83,10 @@ const useStorage = () => storage;
 
 storage.mount('/assets', assets);
 
-storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","base":"C:\\WIP Projects\\Snake\\Snake","ignore":["**/node_modules/**","**/.git/**"]}));
-storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","base":"C:\\WIP Projects\\Snake\\Snake\\server","ignore":["**/node_modules/**","**/.git/**"]}));
-storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","base":"C:\\WIP Projects\\Snake\\Snake\\.nuxt","ignore":["**/node_modules/**","**/.git/**"]}));
-storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","base":"C:\\WIP Projects\\Snake\\Snake\\.nuxt\\cache","ignore":["**/node_modules/**","**/.git/**"]}));
+storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","base":"C:\\WIP Projects\\Dither-Snake\\Dither-Snake","ignore":["**/node_modules/**","**/.git/**"]}));
+storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","base":"C:\\WIP Projects\\Dither-Snake\\Dither-Snake\\server","ignore":["**/node_modules/**","**/.git/**"]}));
+storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","base":"C:\\WIP Projects\\Dither-Snake\\Dither-Snake\\.nuxt","ignore":["**/node_modules/**","**/.git/**"]}));
+storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","base":"C:\\WIP Projects\\Dither-Snake\\Dither-Snake\\.nuxt\\cache","ignore":["**/node_modules/**","**/.git/**"]}));
 
 const config = useRuntimeConfig();
 const _routeRulesMatcher = toRouteMatcher(createRouter({ routes: config.nitro.routeRules }));
@@ -397,10 +397,10 @@ const errorHandler = (async function errorhandler(error, event) {
   event.res.end(html);
 });
 
-const _lazy_Ey3vMI = () => import('./renderer.mjs');
+const _lazy_1B4Bkb = () => import('./renderer.mjs');
 
 const handlers = [
-  { route: '/**', handler: _lazy_Ey3vMI, lazy: true, middleware: false, method: undefined }
+  { route: '/**', handler: _lazy_1B4Bkb, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {

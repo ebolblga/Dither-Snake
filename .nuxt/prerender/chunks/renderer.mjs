@@ -1,18 +1,18 @@
-import { renderResourceHeaders, createRenderer } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/vue-bundle-renderer/dist/runtime.mjs';
-import { eventHandler, getQuery, writeEarlyHints, appendHeader } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/h3/dist/index.mjs';
-import { joinURL } from 'file://C:/WIP%20Projects/Snake/Snake/node_modules/ufo/dist/index.mjs';
+import { renderResourceHeaders, createRenderer } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/vue-bundle-renderer/dist/runtime.mjs';
+import { eventHandler, getQuery, writeEarlyHints, appendHeader } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/h3/dist/index.mjs';
+import { joinURL } from 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/ufo/dist/index.mjs';
 import { u as useNitroApp, a as useRuntimeConfig, g as getRouteRules } from './nitro-prerenderer.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/node-fetch-native/dist/polyfill.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/ohmyfetch/dist/node.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/destr/dist/index.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/unenv/runtime/fetch/index.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/hookable/dist/index.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/scule/dist/index.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/ohash/dist/index.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/unstorage/dist/index.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/unstorage/dist/drivers/fs.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/defu/dist/defu.mjs';
-import 'file://C:/WIP%20Projects/Snake/Snake/node_modules/radix3/dist/index.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/node-fetch-native/dist/polyfill.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/ohmyfetch/dist/node.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/destr/dist/index.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/unenv/runtime/fetch/index.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/hookable/dist/index.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/scule/dist/index.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/ohash/dist/index.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/unstorage/dist/index.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/unstorage/dist/drivers/fs.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/defu/dist/defu.mjs';
+import 'file://C:/WIP%20Projects/Dither-Snake/Dither-Snake/node_modules/radix3/dist/index.mjs';
 
 function defineRenderHandler(handler) {
   return eventHandler(async (event) => {

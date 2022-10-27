@@ -1,2 +1,0 @@
-import{u as t,a as n}from"../server.mjs";import{defineComponent as i,openBlock as s,createElementBlock as a,renderSlot as c}from"vue";import"#internal/nitro";import"vue-router";const r={class:"h-screen"},d=i({__name:"default",setup(_){const{public:{base:e}}=t();return n({link:[{rel:"icon",href:`${e}favicon.ico`,type:"image/x-icon",id:"favicon"}]}),(o,l)=>(s(),a("div",r,[c(o.$slots,"default")]))}});export{d as default};
-//# sourceMappingURL=default.180302e5.js.map

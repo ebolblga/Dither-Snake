@@ -6142,15 +6142,15 @@ module.exports = {
   "content": {
     "relative": false,
     "files": [
-      "C:/WIP Projects/Snake/Snake/components/**/*.{vue,js,ts}",
-      "C:/WIP Projects/Snake/Snake/layouts/**/*.vue",
-      "C:/WIP Projects/Snake/Snake/pages/**/*.vue",
-      "C:/WIP Projects/Snake/Snake/composables/**/*.{js,ts}",
-      "C:/WIP Projects/Snake/Snake/plugins/**/*.{js,ts}",
-      "C:/WIP Projects/Snake/Snake/App.{js,ts,vue}",
-      "C:/WIP Projects/Snake/Snake/app.{js,ts,vue}",
-      "C:/WIP Projects/Snake/Snake/Error.{js,ts,vue}",
-      "C:/WIP Projects/Snake/Snake/error.{js,ts,vue}"
+      "C:/WIP Projects/Dither-Snake/Dither-Snake/components/**/*.{vue,js,ts}",
+      "C:/WIP Projects/Dither-Snake/Dither-Snake/layouts/**/*.vue",
+      "C:/WIP Projects/Dither-Snake/Dither-Snake/pages/**/*.vue",
+      "C:/WIP Projects/Dither-Snake/Dither-Snake/composables/**/*.{js,ts}",
+      "C:/WIP Projects/Dither-Snake/Dither-Snake/plugins/**/*.{js,ts}",
+      "C:/WIP Projects/Dither-Snake/Dither-Snake/App.{js,ts,vue}",
+      "C:/WIP Projects/Dither-Snake/Dither-Snake/app.{js,ts,vue}",
+      "C:/WIP Projects/Dither-Snake/Dither-Snake/Error.{js,ts,vue}",
+      "C:/WIP Projects/Dither-Snake/Dither-Snake/error.{js,ts,vue}"
     ],
     "extract": {},
     "transform": {}
