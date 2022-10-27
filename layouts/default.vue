@@ -1,0 +1,31 @@
+<script setup lang="ts">
+const {
+  public: { base },
+} = useRuntimeConfig();
+useHead({
+  link: [
+    {
+      rel: "icon",
+      href: `${base}favicon.ico`,
+      type: "image/x-icon",
+      id: "favicon",
+    },
+  ],
+});
+</script>
+
+<template>
+  <div class="h-screen">
+    <slot />
+  </div>
+</template>
+
+<style>
+body {
+  background: #21263F;
+  background-size: 100% 100%;
+  font-size: 14px;
+  color: #EDE6CC;
+  margin: 0;
+}
+</style>
