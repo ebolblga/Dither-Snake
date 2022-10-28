@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from '#imports'
-useHead({ title: "1D Minesweeper" });
+useHead({ title: "Snake" });
 
 let cellSize: number = 16;
 let width: number = Math.floor(window.innerWidth / 64);
@@ -20,6 +20,12 @@ foodTexture.src = "./assets/food_atlas.png";
 await new Promise((resolve) => {
     foodTexture.onload = () => resolve(1);
 });
+
+const foodSound = new Audio("./sfx/food.wav");
+foodSound.volume = 0.1;
+
+const deathSound = new Audio("./sfx/death.wav");
+deathSound.volume = 0.3;
 
 const buffer = {
     velocityX: 0,
@@ -114,6 +120,7 @@ async function renderFrame() {
         ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
 
         if (cell.x === food.x && cell.y === food.y) {
+            foodSound.play();
             snake.maxTail++;
             score.value++;
             snake.tail.push([food.x, food.y]);
@@ -122,7 +129,8 @@ async function renderFrame() {
 
         for( let i = index + 1; i < snake.tail.length; i++ ) {
             if ( cell.x == snake.tail[i].x && cell.y == snake.tail[i].y ) {
-                gameOver();
+                deathSound.play();
+                isOver.value = true;
             }
         }
     });
@@ -236,10 +244,6 @@ function changeDirection(e) {
     if (isOver.value && e.code === "KeyX") {
         resetGame();
     }
-}
-
-async function gameOver() {
-    isOver.value = true;
 }
 
 async function resetGame() {
