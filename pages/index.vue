@@ -2,36 +2,43 @@
 import { onMounted } from '#imports'
 useHead({ title: "1D Minesweeper" });
 
-let cellSize: number = 10;
-let height: number = 20;
-let width: number = 20;
+let cellSize: number = 16;
+let width: number = Math.floor(window.innerWidth / 64);
+let height: number = Math.floor(window.innerHeight / 64);
 let scene, ctx;
 const score = ref(0);
-let isOver: boolean = false;
+let isOver = ref(false);
 
 const floor = new Image();
-floor.src = "./floor.png";
+floor.src = "./assets/floor.png";
 await new Promise((resolve) => {
     floor.onload = () => resolve(1);
 });
 
 const foodTexture = new Image();
-foodTexture.src = "./food.png";
+foodTexture.src = "./assets/food_atlas.png";
 await new Promise((resolve) => {
     foodTexture.onload = () => resolve(1);
 });
+
+const buffer = {
+    velocityX: 0,
+    velocityY: 0
+}
 
 const snake = {
     x: 0,
     y: 0,
     velocityX: 0,
     velocityY: 0,
-    tail: []
+    tail: [],
+    maxTail: 1
 }
 
 const food = {
-    x: 0,
-    y: 0
+    index: 0,
+    x: 1,
+    y: 1
 }
 
 onMounted(async ()=>{
@@ -42,75 +49,91 @@ onMounted(async ()=>{
 
     await updateFoodPos();
     document.addEventListener("keydown", changeDirection);
-    setInterval(renderFrame, 66.67); // 1000/15 = 66.67ms - 15fps
+    window.addEventListener("resize", updateRes);
+    setInterval(function () {
+        renderFrame();
+    }, 100);  // 1000 / 15 = 66.67ms - 15fps
 });
 
+function updateRes() {
+    width = Math.floor(window.innerWidth / 64);
+    height = Math.floor(window.innerHeight / 64);
+
+    scene.height = height * cellSize;
+    scene.width = width * cellSize;
+
+    if (food.x > width - 1) {
+        updateFoodPos();
+    }
+    if (food.y > height - 1) {
+        updateFoodPos();
+    }
+    
+    renderFrame();
+}
+
 async function renderFrame() {
-    if (isOver) {
+    if (isOver.value) {
         return;
     }
 
     // background
-    // ctx.fillStyle = "black";
-    // ctx.fillRect(0, 0, scene.width, scene.height);
-    ctx.drawImage(floor, 0, 0);
+    ctx.drawImage(floor, 0, 0, scene.width, scene.height);
 
     // food
-    // ctx.fillStyle = 'rgb(219,157,169)';
-    // ctx.fillRect(food.x, food.y, cellSize, cellSize);
-    ctx.drawImage(foodTexture, food.x, food.y);
+    ctx.drawImage(foodTexture, food.index * cellSize, 0, cellSize, cellSize, food.x * cellSize, food.y * cellSize, cellSize, cellSize);
 
-    // snake
-    if (snake.x === food.x && snake.y === food.y) {
-        snake.tail.push([food.x, food.y]);
-        updateFoodPos();
-    }
+    snake.velocityX = buffer.velocityX;
+    snake.velocityY = buffer.velocityY;
 
-    for (let i = snake.tail.length - 1; i > 0; i--) {
-        snake.tail[i] = snake.tail[i - 1];
-    }
-
-    if (snake.tail.length) {
-        snake.tail[0] = [snake.x, snake.y];
-    }
-
-    snake.x += snake.velocityX * cellSize;
-    snake.y += snake.velocityY * cellSize;
+    snake.x += snake.velocityX;
+    snake.y += snake.velocityY;
 
     if (snake.x < 0) {
-        snake.x = (width - 1) * cellSize;
+        snake.x = (width - 1);
     }
-    if (snake.x > (width - 1) * cellSize) {
+    else if (snake.x > (width - 1)) {
         snake.x = 0;
     }
+
     if (snake.y < 0) {
-        snake.y = (height - 1) * cellSize;
+        snake.y = (height - 1);
     }
-    if (snake.y > (height - 1) * cellSize) {
+    else if (snake.y > (height - 1)) {
         snake.y = 0;
     }
 
-    ctx.fillStyle = 'white';
-    ctx.fillRect(snake.x, snake.y, cellSize, cellSize);
+    snake.tail.unshift({ x: snake.x, y: snake.y });
 
-    // tail
-    ctx.fillStyle = 'rgb(237, 230, 204)';
-    for (let i = 0; i < snake.tail.length; i++) {
-        ctx.fillRect(snake.tail[i][0], snake.tail[i][1], cellSize, cellSize);
-    }
+    if (snake.tail.length > snake.maxTail) {
+		snake.tail.pop();
+	}
+    
+    ctx.fillStyle = "white";
+    snake.tail.forEach( function(cell, index) {
+        ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
 
-    //game over
-    for (let i = 0; i < snake.tail.length; i++) {
-        if (snake.x === snake.tail[i][0] && snake.y === snake.tail[i][1]) {
-            gameOver();
+        if (cell.x === food.x && cell.y === food.y) {
+            snake.maxTail++;
+            score.value++;
+            snake.tail.push([food.x, food.y]);
+            updateFoodPos();
         }
-    }
+
+        for( let i = index + 1; i < snake.tail.length; i++ ) {
+            if ( cell.x == snake.tail[i].x && cell.y == snake.tail[i].y ) {
+                gameOver();
+            }
+        }
+    });
 
     ditherFrame();
 }
 
 async function ditherFrame() {
-    const lightRadius = 125;
+    //let lightRadius = 125;
+    const lightRadius = Math.floor(Math.random() * (130 - 120) + 120);
+
     const shadingCanvas = document.createElement("canvas");
     shadingCanvas.width = scene.width;
     shadingCanvas.height = scene.height;
@@ -118,19 +141,23 @@ async function ditherFrame() {
     shadingCtx.fillStyle = "black";
     shadingCtx.fillRect(0, 0, scene.width, scene.height);
 
-    let gradient = shadingCtx.createRadialGradient(snake.x, snake.y, 0, snake.x, snake.y, lightRadius);
+    const snakeX = snake.x * cellSize + (cellSize / 2);
+    const snakeY = snake.y * cellSize + (cellSize / 2);
+    let gradient = shadingCtx.createRadialGradient(snakeX, snakeY, 0, snakeX, snakeY, lightRadius);
     gradient.addColorStop(0.0, "rgba(255, 255, 255, 255)");
     gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
     shadingCtx.beginPath();
     shadingCtx.fillStyle = gradient;
-    shadingCtx.arc(snake.x, snake.y, lightRadius, 0, 2 * Math.PI);
+    shadingCtx.arc(snakeX, snakeY, lightRadius, 0, 2 * Math.PI);
     shadingCtx.fill();
 
-    let gradient2 = shadingCtx.createRadialGradient(food.x, food.y, 0, food.x, food.y, lightRadius / 2);
+    const foodX = food.x * cellSize + (cellSize / 2);
+    const foodY = food.y * cellSize + (cellSize / 2);
+    let gradient2 = shadingCtx.createRadialGradient(foodX, foodY, 0, foodX, foodY, lightRadius / 2);
     gradient2.addColorStop(0.0, "rgba(255, 255, 255, 255)");
     gradient2.addColorStop(1.0, "rgba(255, 255, 255, 0)");
     shadingCtx.fillStyle = gradient2;
-    shadingCtx.arc(food.x, food.y, lightRadius / 2, 0, 2 * Math.PI);
+    shadingCtx.arc(foodX, foodY, lightRadius / 2, 0, 2 * Math.PI);
     shadingCtx.fill();
 
     // screen overlay mode
@@ -169,43 +196,73 @@ function bayer(image, threshold) {
       image.data.fill(value, i, i + 3);
     }
     return image;
-  }
+}
 
 async function updateFoodPos() {
-    food.x = Math.floor(Math.random() * width) * cellSize;
-    food.y = Math.floor(Math.random() * height) * cellSize;
-    score.value++;
+    let isPlaced = false;
+    while (!isPlaced) {
+        food.x = Math.floor(Math.random() * width);
+        food.y = Math.floor(Math.random() * height);
+
+        isPlaced = true;
+        snake.tail.forEach( function(cell) {
+            if (cell.x === food.x && cell.y === food.y) {
+                isPlaced = false;
+            }
+        });
+    }
+
+    food.index = Math.floor(Math.random() * 5);
 }
 
 function changeDirection(e) {
     if ((e.code === "ArrowUp" || e.code === "KeyW") && snake.velocityY != 1) {
-        snake.velocityX = 0;
-        snake.velocityY = -1;
+        buffer.velocityX = 0;
+        buffer.velocityY = -1;
     }
     else if ((e.code === "ArrowDown" || e.code === "KeyS") && snake.velocityY != -1) {
-        snake.velocityX = 0;
-        snake.velocityY = 1;
+        buffer.velocityX = 0;
+        buffer.velocityY = 1;
     }
     else if ((e.code === "ArrowLeft" || e.code === "KeyA") && snake.velocityX != 1) {
-        snake.velocityX = -1;
-        snake.velocityY = 0;
+        buffer.velocityX = -1;
+        buffer.velocityY = 0;
     }
     else if ((e.code === "ArrowRight" || e.code === "KeyD") && snake.velocityX != -1) {
-        snake.velocityX = 1;
-        snake.velocityY = 0;
+        buffer.velocityX = 1;
+        buffer.velocityY = 0;
+    }
+    
+    if (isOver.value && e.code === "KeyX") {
+        resetGame();
     }
 }
 
 async function gameOver() {
-    isOver = true;
+    isOver.value = true;
+}
+
+async function resetGame() {
     score.value = 0;
+    isOver.value = false;
+    snake.x = snake.y = snake.velocityX = snake.velocityY = 0;
+    snake.maxTail = 1;
     snake.tail = [];
+    buffer.velocityX = buffer.velocityY = 0;
+    updateFoodPos();
 }
 </script>
 
 <template>
-    <div class="flex justify-center flex-wrap flex-col items-center min-w-[300px] select-none">
-        <p>Score: {{ score }}</p>
-        <canvas id="scene" class="w-[95vw]" style="image-rendering: pixelated"></canvas>
+    <div class="h-full select-none">
+        <canvas id="scene" class="z-0 w-full h-full" style="image-rendering: pixelated"></canvas>
+        <p class="fixed top-6 right-4 text-black">Score: {{ score }}</p>
+        <p class="fixed top-5 right-5">Score: {{ score }}</p>
+        <div v-if="isOver">
+            <p class="fixed top-11 right-4 text-black text-lg">Game over</p>
+            <p class="fixed top-10 right-5 text-lg">Game over</p>
+            <p class="fixed top-16 right-4 text-black text-xs">Press X to restart</p>
+            <p class="fixed top-16 right-5 text-xs">Press X to restart</p>
+        </div>
     </div>
 </template>

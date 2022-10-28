@@ -22,10 +22,16 @@ useHead({
 
 <style>
 body {
-  background: #21263F;
+  background: #616161;
   background-size: 100% 100%;
   font-size: 14px;
-  color: #EDE6CC;
+  color: #FFFFFF;
   margin: 0;
+  font-family: Pixie6x6;
+}
+
+@font-face {
+  font-family: 'Pixie6x6';
+  src: url('/Pixie6x6.ttf');
 }
 </style>
