@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { onMounted } from '#imports'
-useHead({ title: "Snake" });
+useHead({ title: "DitherSnake" });
 
-let cellSize: number = 16;
+const cellSize: number = 16;
 let width: number = Math.floor(window.innerWidth / 64);
 let height: number = Math.floor(window.innerHeight / 64);
 let scene, ctx;
 const score = ref(0);
-let isOver = ref(false);
+const isOver = ref(false);
+const fps = 10;
 
 const floor = new Image();
 floor.src = "./assets/floor.png";
@@ -58,7 +59,7 @@ onMounted(async ()=>{
     window.addEventListener("resize", updateRes);
     setInterval(function () {
         renderFrame();
-    }, 100);  // 1000 / 15 = 66.67ms - 15fps
+    }, 1000 / fps);  // 1000 / 15 = 66.67ms - 15fps
 });
 
 function updateRes() {
@@ -260,13 +261,10 @@ async function resetGame() {
 <template>
     <div class="h-full select-none">
         <canvas id="scene" class="z-0 w-full h-full" style="image-rendering: pixelated"></canvas>
-        <p class="fixed top-6 right-4 text-black">Score: {{ score }}</p>
-        <p class="fixed top-5 right-5">Score: {{ score }}</p>
+        <p class="fixed top-5 right-5 bg-black">Score: {{ score }}</p>
         <div v-if="isOver">
-            <p class="fixed top-11 right-4 text-black text-lg">Game over</p>
-            <p class="fixed top-10 right-5 text-lg">Game over</p>
-            <p class="fixed top-16 right-4 text-black text-xs">Press X to restart</p>
-            <p class="fixed top-16 right-5 text-xs">Press X to restart</p>
+            <p class="fixed top-10 right-5 text-lg bg-black">Game over</p>
+            <p class="fixed top-16 right-5 text-xs bg-black">Press X to restart</p>
         </div>
     </div>
 </template>
