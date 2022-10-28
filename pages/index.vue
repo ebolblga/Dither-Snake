@@ -22,6 +22,12 @@ await new Promise((resolve) => {
     foodTexture.onload = () => resolve(1);
 });
 
+const particleSprite = new Image();
+particleSprite.src = "./assets/particle_sprite.png";
+await new Promise((resolve) => {
+    particleSprite.onload = () => resolve(1);
+});
+
 const foodSound = new Audio("./sfx/food.wav");
 foodSound.volume = 0.1;
 
@@ -45,7 +51,8 @@ const snake = {
 const food = {
     index: 0,
     x: 1,
-    y: 1
+    y: 1,
+    particleFrame: 0,
 }
 
 onMounted(async ()=>{
@@ -162,11 +169,11 @@ async function ditherFrame() {
 
     const foodX = food.x * cellSize + (cellSize / 2);
     const foodY = food.y * cellSize + (cellSize / 2);
-    let gradient2 = shadingCtx.createRadialGradient(foodX, foodY, 0, foodX, foodY, lightRadius / 2);
+    let gradient2 = shadingCtx.createRadialGradient(foodX, foodY, 10, foodX, foodY, lightRadius / 3);
     gradient2.addColorStop(0.0, "rgba(255, 255, 255, 255)");
     gradient2.addColorStop(1.0, "rgba(255, 255, 255, 0)");
     shadingCtx.fillStyle = gradient2;
-    shadingCtx.arc(foodX, foodY, lightRadius / 2, 0, 2 * Math.PI);
+    shadingCtx.arc(foodX, foodY, lightRadius / 3, 0, 2 * Math.PI);
     shadingCtx.fill();
 
     // screen overlay mode
@@ -185,6 +192,14 @@ async function ditherFrame() {
     let image = ctx.getImageData(0, 0, scene.width, scene.height);
     image = bayer(image, 128);
     ctx.putImageData(image, 0, 0);
+
+    //particles
+    food.particleFrame++;
+    if (food.particleFrame > 25) {
+        food.particleFrame = 0;
+    }
+
+    ctx.drawImage(particleSprite, food.particleFrame * cellSize, 0, cellSize, cellSize * 2, food.x * cellSize, (food.y - 3) * cellSize, cellSize, cellSize * 2);
 }
 
 function bayer(image, threshold) {
