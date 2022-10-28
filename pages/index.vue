@@ -34,6 +34,60 @@ foodSound.volume = 0.1;
 const deathSound = new Audio("./sfx/death.wav");
 deathSound.volume = 0.3;
 
+const touch = {
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0
+}
+
+document.addEventListener("touchstart", e => {
+    touch.startX = e.touches[0].clientX;
+    touch.startY = e.touches[0].clientY;
+
+    touch.endX = e.touches[0].clientX;
+    touch.endY = e.touches[0].clientY;
+});
+
+document.addEventListener("touchmove", e => {
+    touch.endX = e.touches[0].clientX;
+    touch.endY = e.touches[0].clientY;
+});
+
+document.addEventListener("touchend", e => {
+    let differenceX = touch.startX - touch.endX;
+    let differenceY = touch.startY - touch.endY;
+
+    if ((Math.abs(differenceY) + Math.abs(differenceX)) < 20) {
+        if (isOver.value) {
+            resetGame();
+        }
+
+        return;
+    }
+
+    if (Math.abs(differenceY) > Math.abs(differenceX)) {
+        if (differenceY > 0 && snake.velocityY != 1) {
+            buffer.velocityX = 0;
+            buffer.velocityY = -1;
+        }
+        else if (differenceY <= 0 && snake.velocityY != -1) {
+            buffer.velocityX = 0;
+            buffer.velocityY = 1;
+        }
+    }
+    else if (Math.abs(differenceY) < Math.abs(differenceX)) {
+        if (differenceX > 0 && snake.velocityX != 1) {
+            buffer.velocityX = -1;
+            buffer.velocityY = 0;
+        }
+        else if (differenceX <= 0 && snake.velocityX != -1) {
+            buffer.velocityX = 1;
+            buffer.velocityY = 0;
+        }
+    }
+});
+
 const buffer = {
     velocityX: 0,
     velocityY: 0

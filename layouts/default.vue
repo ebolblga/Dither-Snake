@@ -28,7 +28,7 @@ body {
   color: #FFFFFF;
   margin: 0;
   font-family: Pixie6x6;
-  cursor: url("./cursor.cur"),auto;
+  cursor: url("/cursor.cur"),auto;
 }
 
 @font-face {
