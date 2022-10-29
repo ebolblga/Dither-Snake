@@ -15,6 +15,9 @@ Amazing particle animation:
 
 SFX generated using [sfxr](https://sfxr.me/).
 
+My high score)  
+![image](https://user-images.githubusercontent.com/82185066/198754156-3d1f44fb-425e-4644-9cb8-fa7be5a31125.png)
+
 ## How to launch yourself using [Node.js](https://nodejs.org/en/) and [Visual Studio Code](https://code.visualstudio.com/download)
 
 ```bash
