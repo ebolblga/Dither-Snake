@@ -9,9 +9,43 @@ let scene, ctx;
 const score = ref(0);
 const isOver = ref(false);
 const fps = 10;
+const bgColor = ref("rgb(0, 0, 0)");
+const textColor = ref("rgb(255, 255, 255)");
+
+const dither = {
+    index: 0,
+    light: [
+        [255, 255, 255],    // #FFFFFF
+        [244, 78, 56],      // #F44E38
+        [199, 199, 199],    // #C7C7C7           
+        [195, 220, 229],    // #C3DCE5
+        [237, 246, 214],    // #EDF6D6
+        [235, 229, 206],    // #EBE5CE
+        [114, 164, 136],    // #72A488
+        [34, 35, 35]       // #222324
+    ],
+
+    dark: [
+        [0, 0, 0],          // #000000
+        [29, 15, 68],       // #1D0F44
+        [20, 23, 36],       // #141724    
+        [17, 12, 34],       // #110C22
+        [62, 35, 44],       // #3E232C
+        [46, 48, 55],       // #2E3037
+        [33, 44, 40],       // #212C28
+        [240, 246, 240]    // #F0F6F0
+    ]
+}
+
+const touch = {
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0
+}
 
 const floor = new Image();
-floor.src = "./assets/floor.png";
+floor.src = "./assets/floor_texture.png";
 await new Promise((resolve) => {
     floor.onload = () => resolve(1);
 });
@@ -33,13 +67,6 @@ foodSound.volume = 0.1;
 
 const deathSound = new Audio("./sfx/death.wav");
 deathSound.volume = 0.3;
-
-const touch = {
-    startX: 0,
-    startY: 0,
-    endX: 0,
-    endY: 0
-}
 
 document.addEventListener("touchstart", e => {
     touch.startX = e.touches[0].clientX;
@@ -201,8 +228,9 @@ async function renderFrame() {
 }
 
 async function ditherFrame() {
-    //let lightRadius = 125;
-    const lightRadius = Math.floor(Math.random() * (130 - 120) + 120);
+    const brightness = 165;
+    const flicker = 5;
+    const lightRadius = Math.floor(Math.random() * ((brightness + flicker) - (brightness - flicker)) + (brightness - flicker));
 
     const shadingCanvas = document.createElement("canvas");
     shadingCanvas.width = scene.width;
@@ -214,8 +242,22 @@ async function ditherFrame() {
     const snakeX = snake.x * cellSize + (cellSize / 2);
     const snakeY = snake.y * cellSize + (cellSize / 2);
     let gradient = shadingCtx.createRadialGradient(snakeX, snakeY, 0, snakeX, snakeY, lightRadius);
+    // gradient.addColorStop(0.0, "rgba(255, 255, 255, 255)");
+    // gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
+
+    // realistic light falloff
     gradient.addColorStop(0.0, "rgba(255, 255, 255, 255)");
-    gradient.addColorStop(1.0, "rgba(255, 255, 255, 0)");
+    gradient.addColorStop(0.1, "rgba(206, 206, 206, 206)");
+    gradient.addColorStop(0.2, "rgba(163, 163, 163, 163)");
+    gradient.addColorStop(0.3, "rgba(125, 125, 125, 125)");
+    gradient.addColorStop(0.4, "rgba(92, 92, 92, 92)");
+    gradient.addColorStop(0.5, "rgba(64, 64, 64, 64)");
+    gradient.addColorStop(0.6, "rgba(41, 41, 41, 41)");
+    gradient.addColorStop(0.7, "rgba(23, 23, 23, 23)");
+    gradient.addColorStop(0.8, "rgba(10, 10, 10, 10)");
+    gradient.addColorStop(0.9, "rgba(2, 2, 2, 2)");
+    gradient.addColorStop(1.0, "rgba(0, 0, 0, 0)");
+
     shadingCtx.beginPath();
     shadingCtx.fillStyle = gradient;
     shadingCtx.arc(snakeX, snakeY, lightRadius, 0, 2 * Math.PI);
@@ -223,7 +265,7 @@ async function ditherFrame() {
 
     const foodX = food.x * cellSize + (cellSize / 2);
     const foodY = food.y * cellSize + (cellSize / 2);
-    let gradient2 = shadingCtx.createRadialGradient(foodX, foodY, 10, foodX, foodY, lightRadius / 3);
+    let gradient2 = shadingCtx.createRadialGradient(foodX, foodY, 8, foodX, foodY, lightRadius / 4);
     gradient2.addColorStop(0.0, "rgba(255, 255, 255, 255)");
     gradient2.addColorStop(1.0, "rgba(255, 255, 255, 0)");
     shadingCtx.fillStyle = gradient2;
@@ -254,6 +296,41 @@ async function ditherFrame() {
     }
 
     ctx.drawImage(particleSprite, food.particleFrame * cellSize, 0, cellSize, cellSize * 2, food.x * cellSize, (food.y - 3) * cellSize, cellSize, cellSize * 2);
+
+    const radius = Math.floor(lightRadius / 4);
+    ctx.strokeStyle = textColor.value;
+    ctx.lineWidth = 2;
+    if (foodX + radius > scene.width) {
+        let leftOver = foodX + radius - scene.width;
+        ctx.beginPath();
+        ctx.moveTo(scene.width, foodY - leftOver);
+        ctx.lineTo(scene.width, foodY + leftOver);
+        ctx.stroke();
+    }
+    
+    if (foodX - radius < 0) {
+        let leftOver = foodX - radius;
+        ctx.beginPath();
+        ctx.moveTo(0, foodY - leftOver);
+        ctx.lineTo(0, foodY + leftOver);
+        ctx.stroke();
+    }
+
+    if (foodY + radius > scene.height) {
+        let leftOver = foodY + radius - scene.height;
+        ctx.beginPath();
+        ctx.moveTo(foodX - leftOver, scene.height);
+        ctx.lineTo(foodX + leftOver, scene.height);
+        ctx.stroke();
+    }
+
+    if (foodY - radius < 0) {
+        let leftOver = foodY - radius;
+        ctx.beginPath();
+        ctx.moveTo(foodX - leftOver, 0);
+        ctx.lineTo(foodX + leftOver, 0);
+        ctx.stroke();
+    }
 }
 
 function bayer(image, threshold) {
@@ -261,7 +338,7 @@ function bayer(image, threshold) {
       [15, 135, 45, 165],
       [195, 75, 225, 105],
       [60, 180, 30, 150],
-      [240, 120, 210, 90],
+      [240, 120, 210, 90]
     ];
 
     for (let i = 0; i < image.data.length; i += 4) {
@@ -270,8 +347,20 @@ function bayer(image, threshold) {
       const x = i / 4 % image.width;
       const y = Math.floor(i / 4 / image.width);
       const map = Math.floor((luminance + thresholdMap[x % 4][y % 4]) / 2);
-      const value = map < threshold ? 0 : 255;
-      image.data.fill(value, i, i + 3);
+    //   const value = map < threshold ? 0 : 255;
+    //   image.data.fill(value, i, i + 3);
+
+      if (map >= threshold) {
+        image.data[i] = dither.light[dither.index][0];
+        image.data[i + 1] = dither.light[dither.index][1];
+        image.data[i + 2] = dither.light[dither.index][2];
+      }
+      else {
+        image.data[i] = dither.dark[dither.index][0];
+        image.data[i + 1] = dither.dark[dither.index][1];
+        image.data[i + 2] = dither.dark[dither.index][2];
+      }
+      
     }
     return image;
 }
@@ -314,6 +403,21 @@ function changeDirection(e) {
     if (isOver.value && e.code === "KeyX") {
         resetGame();
     }
+
+    if (e.code === "KeyC") {
+        dither.index++;
+        if (dither.index >= dither.light.length) {
+            dither.index = 0;
+        }
+
+        bgColor.value = "rgb(" + dither.dark[dither.index][0] + ", "
+                                + dither.dark[dither.index][1] + ", "
+                                + dither.dark[dither.index][2] + ")";
+
+        textColor.value = "rgb(" + dither.light[dither.index][0] + ", "
+                                + dither.light[dither.index][1] + ", "
+                                + dither.light[dither.index][2] + ")";
+    }
 }
 
 async function resetGame() {
@@ -330,10 +434,24 @@ async function resetGame() {
 <template>
     <div class="h-full select-none">
         <canvas id="scene" class="z-0 w-full h-full" style="image-rendering: pixelated"></canvas>
-        <p class="fixed top-5 right-5 bg-black">Score: {{ score }}</p>
+        <p class="fixed top-5 right-5 bg text">Score: {{ score }}</p>
         <div v-if="isOver">
-            <p class="fixed top-10 right-5 text-lg bg-black">Game over</p>
-            <p class="fixed top-16 right-5 text-xs bg-black">Press X to restart</p>
+            <p class="fixed top-10 right-5 text-lg bg text">Game over</p>
+            <p class="fixed top-16 right-5 text-xs bg text">Press X to restart</p>
         </div>
     </div>
 </template>
+
+<style>
+.bg {
+    background-color: v-bind(bgColor);
+}
+
+.text {
+    color: v-bind(textColor);
+}
+
+body {
+    background-color: v-bind(bgColor);
+}
+</style>
