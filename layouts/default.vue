@@ -8,14 +8,21 @@ useHead({
       rel: "icon",
       href: `${base}favicon.ico`,
       type: "image/x-icon",
-      id: "favicon",
+      id: "favicon"
+    }
+  ],
+  htmlAttrs: {
+      lang: 'en'
     },
+  meta: [
+    { name: 'description', content: 'Author: ebolblga, Snake game with shading and dithering.' }
   ],
 });
 </script>
 
 <template>
   <div class="h-screen">
+    <link rel="preload" href="/Dither-Snake/Pixie6x6.ttf" as="font" type="font/woff2" />
     <slot />
   </div>
 </template>
@@ -28,7 +35,7 @@ body {
   color: #FFFFFF;
   margin: 0;
   font-family: Pixie6x6;
-  cursor: url("/cursor.cur"),auto;
+  cursor: url("/cursor.cur"), auto;
 }
 
 @font-face {

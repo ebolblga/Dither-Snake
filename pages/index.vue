@@ -13,8 +13,8 @@ const bgColor = ref("rgb(0, 0, 0)");
 const textColor = ref("rgb(255, 255, 255)");
 
 const snake = {
-    x: 4,
-    y: 4,
+    x: 0,
+    y: 0,
     velocityX: 0,
     velocityY: 0,
     tail: [],
