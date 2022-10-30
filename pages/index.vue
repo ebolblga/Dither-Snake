@@ -12,6 +12,34 @@ const fps = 10;
 const bgColor = ref("rgb(0, 0, 0)");
 const textColor = ref("rgb(255, 255, 255)");
 
+const snake = {
+    x: 4,
+    y: 4,
+    velocityX: 0,
+    velocityY: 0,
+    tail: [],
+    maxTail: 1
+}
+
+const food = {
+    index: 0,
+    x: 1,
+    y: 1,
+    particleFrame: 0,
+}
+
+const buffer = {
+    velocityX: 0,
+    velocityY: 0
+}
+
+const touch = {
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0
+}
+
 const dither = {
     index: 0,
     light: [
@@ -35,13 +63,6 @@ const dither = {
         [33, 44, 40],       // #212C28
         [240, 246, 240]    // #F0F6F0
     ]
-}
-
-const touch = {
-    startX: 0,
-    startY: 0,
-    endX: 0,
-    endY: 0
 }
 
 const floor = new Image();
@@ -115,27 +136,6 @@ document.addEventListener("touchend", e => {
     }
 });
 
-const buffer = {
-    velocityX: 0,
-    velocityY: 0
-}
-
-const snake = {
-    x: 0,
-    y: 0,
-    velocityX: 0,
-    velocityY: 0,
-    tail: [],
-    maxTail: 1
-}
-
-const food = {
-    index: 0,
-    x: 1,
-    y: 1,
-    particleFrame: 0,
-}
-
 onMounted(async ()=>{
     scene = document.getElementById("scene");
     scene.height = height * cellSize;
@@ -143,40 +143,21 @@ onMounted(async ()=>{
     ctx = scene.getContext("2d");
 
     await updateFoodPos();
-    document.addEventListener("keydown", changeDirection);
+    document.addEventListener("keydown", eventHandler);
     window.addEventListener("resize", updateRes);
     setInterval(function () {
         renderFrame();
     }, 1000 / fps);  // 1000 / 15 = 66.67ms - 15fps
 });
 
-function updateRes() {
-    width = Math.floor(window.innerWidth / 64);
-    height = Math.floor(window.innerHeight / 64);
-
-    scene.height = height * cellSize;
-    scene.width = width * cellSize;
-
-    if (food.x > width - 1) {
-        updateFoodPos();
-    }
-    if (food.y > height - 1) {
-        updateFoodPos();
-    }
-    
-    renderFrame();
-}
-
 async function renderFrame() {
     if (isOver.value) {
         return;
     }
+    const start = Date.now();
 
     // background
     ctx.drawImage(floor, 0, 0, scene.width, scene.height);
-
-    // food
-    ctx.drawImage(foodTexture, food.index * cellSize, 0, cellSize, cellSize, food.x * cellSize, food.y * cellSize, cellSize, cellSize);
 
     snake.velocityX = buffer.velocityX;
     snake.velocityY = buffer.velocityY;
@@ -224,13 +205,15 @@ async function renderFrame() {
         }
     });
 
-    ditherFrame();
+    shadeFrame();
+    //remove await
+    // console.log(Date.now() - start + "ms");
 }
 
-async function ditherFrame() {
-    const brightness = 165;
+async function shadeFrame() {
+    const lightR = 165;
     const flicker = 5;
-    const lightRadius = Math.floor(Math.random() * ((brightness + flicker) - (brightness - flicker)) + (brightness - flicker));
+    const lightRadius = Math.floor(Math.random() * ((lightR + flicker) - (lightR - flicker)) + (lightR - flicker));
 
     const shadingCanvas = document.createElement("canvas");
     shadingCanvas.width = scene.width;
@@ -272,12 +255,21 @@ async function ditherFrame() {
     shadingCtx.arc(foodX, foodY, lightRadius / 3, 0, 2 * Math.PI);
     shadingCtx.fill();
 
-    // screen overlay mode
-    let frame = ctx.getImageData(0, 0, scene.width, scene.height);
-    let mask = shadingCtx.getImageData(0, 0, shadingCanvas.width, shadingCanvas.height);
+    // shadow
+    let shadowMask = foodShadow(snakeX, snakeY, foodX, foodY, lightR + flicker);
 
+    // screen overlay mode
+    let lightMask = shadingCtx.getImageData(0, 0, shadingCanvas.width, shadingCanvas.height);
+    for (let i = 0; i < lightMask.data.length; i += 4) {
+        const brightness = shadowMask.data[i] / 255;
+        lightMask.data[i] *= brightness;
+        // lightMask.data[i + 1] *= brightness;
+        // lightMask.data[i + 2] *= brightness;
+    }
+
+    let frame = ctx.getImageData(0, 0, scene.width, scene.height);
     for (let i = 0; i < frame.data.length; i += 4) {
-        const brightness = mask.data[i] / 255;
+        const brightness = lightMask.data[i] / 255;
         frame.data[i] *= brightness;
         frame.data[i + 1] *= brightness;
         frame.data[i + 2] *= brightness;
@@ -285,8 +277,12 @@ async function ditherFrame() {
 
     ctx.putImageData(frame, 0, 0);
 
+    // food
+    ctx.drawImage(foodTexture, food.index * cellSize, 0, cellSize, cellSize, food.x * cellSize, food.y * cellSize, cellSize, cellSize);
+
+    // dithering
     let image = ctx.getImageData(0, 0, scene.width, scene.height);
-    image = bayer(image, 128);
+    image = bayer4x4(image, 128);
     ctx.putImageData(image, 0, 0);
 
     //particles
@@ -297,6 +293,7 @@ async function ditherFrame() {
 
     ctx.drawImage(particleSprite, food.particleFrame * cellSize, 0, cellSize, cellSize * 2, food.x * cellSize, (food.y - 3) * cellSize, cellSize, cellSize * 2);
 
+    // light on edges
     const radius = Math.floor(lightRadius / 4);
     ctx.strokeStyle = textColor.value;
     ctx.lineWidth = 2;
@@ -333,7 +330,88 @@ async function ditherFrame() {
     }
 }
 
-function bayer(image, threshold) {
+function foodShadow(snakeX, snakeY, foodX, foodY, radius) {
+    // finds 2 tangent points to circle around food from snake
+    const points = tangentPoints(snakeX, snakeY, foodX, foodY, 8);
+
+    // extends tangent lines by the radius of light
+    const dx1 = points[0].x - snakeX;
+    const dy1 = points[0].y - snakeY;
+    const hypot1 = Math.hypot(dx1, dy1)
+    const newPoint1X = points[1].x + ((dx1 / hypot1) * radius);
+    const newPoint1Y = points[1].y + ((dy1 / hypot1) * radius);
+
+    const dx2 = points[1].x - snakeX;
+    const dy2 = points[1].y - snakeY;
+    const hypot2 = Math.hypot(dx2, dy2)
+    const newPoint2X = points[1].x + ((dx2 / hypot2) * radius);
+    const newPoint2Y = points[1].y + ((dy2 / hypot2) * radius);
+
+    // draws shadow canvas
+    const shadowCanvas = document.createElement("canvas");
+    shadowCanvas.width = scene.width;
+    shadowCanvas.height = scene.height;
+    const shadowCtx = shadowCanvas.getContext("2d");
+    shadowCtx.fillStyle = "#FFFFFF";
+    shadowCtx.fillRect(0, 0, scene.width, scene.height);
+
+    shadowCtx.beginPath();
+    shadowCtx.moveTo(points[0].x, points[0].y);
+    shadowCtx.lineTo(newPoint1X, newPoint1Y);
+    shadowCtx.lineTo(newPoint2X, newPoint2Y);
+    shadowCtx.lineTo(points[1].x, points[1].y);
+    shadowCtx.closePath();
+
+    const num = ((hypot1 / (radius / 2)) - 1) * 255;
+    const color = Math.min(Math.max(num, 100), 255);
+    const grade = "rgb(" + color + ", "
+                         + color + ", "
+                         + color + ")";
+
+    shadowCtx.filter = 'blur(4px)';
+    shadowCtx.fillStyle = grade;
+    shadowCtx.fill();
+
+    return shadowCtx.getImageData(0, 0, shadowCanvas.width, shadowCanvas.height);
+}
+
+function tangentPoints(px, py, cx, cy, radius) {
+    const dx = cx - px;
+    const dy = cy - py;
+    const dd = Math.sqrt(dx * dx + dy * dy);
+    const a = Math.asin(radius / dd);
+    const b = Math.atan2(dy, dx);
+
+    // console.log("dx = " + dx);
+    // console.log("dy = " + dy);
+    // console.log("dd = " + dd);
+    // console.log("a = " + a);
+    // console.log("b = " + b);
+
+    let t = b - a
+    const ta = {
+        x: cx + (radius * Math.sin(t)),
+        y: cy + (radius * -Math.cos(t))
+    };
+
+    // console.log("t = " + t);
+    // console.log("point1X = " + ta.x);
+    // console.log("point1Y = " + ta.y);
+
+    t = b + a
+    const tb = {
+        x: cx + (radius * -Math.sin(t)),
+        y: cy + (radius * Math.cos(t))
+    };
+
+    // console.log("t = " + t);
+    // console.log("point2X = " + tb.x);
+    // console.log("point2Y = " + tb.y);
+
+    return [ta, tb];
+}
+
+function bayer4x4(image, threshold) {
     const thresholdMap = [
       [15, 135, 45, 165],
       [195, 75, 225, 105],
@@ -382,7 +460,7 @@ async function updateFoodPos() {
     food.index = Math.floor(Math.random() * 5);
 }
 
-function changeDirection(e) {
+function eventHandler(e) {
     if ((e.code === "ArrowUp" || e.code === "KeyW") && snake.velocityY != 1) {
         buffer.velocityX = 0;
         buffer.velocityY = -1;
@@ -429,14 +507,31 @@ async function resetGame() {
     buffer.velocityX = buffer.velocityY = 0;
     updateFoodPos();
 }
+
+function updateRes() {
+    width = Math.floor(window.innerWidth / 64);
+    height = Math.floor(window.innerHeight / 64);
+
+    scene.height = height * cellSize;
+    scene.width = width * cellSize;
+
+    if (food.x > width - 1) {
+        updateFoodPos();
+    }
+    if (food.y > height - 1) {
+        updateFoodPos();
+    }
+    
+    renderFrame();
+}
 </script>
 
 <template>
     <div class="h-full select-none">
         <canvas id="scene" class="z-0 w-full h-full" style="image-rendering: pixelated"></canvas>
-        <p class="fixed top-5 right-5 bg text">Score: {{ score }}</p>
+        <p class="fixed top-5 right-5 bg text">SCORE - {{ score }}</p>
         <div v-if="isOver">
-            <p class="fixed top-10 right-5 text-lg bg text">Game over</p>
+            <p class="fixed top-10 right-5 text-lg bg text">GAME OVER</p>
             <p class="fixed top-16 right-5 text-xs bg text">Press X to restart</p>
         </div>
     </div>
